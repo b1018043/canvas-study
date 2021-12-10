@@ -12,8 +12,9 @@ const Canvas = ()=>{
     };
 
     const drawBackground = (ctx: CanvasRenderingContext2D) =>{
+        ctx.fillStyle = "black"
         ctx.fillRect(0,0,1000,700);
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "red";
         ctx.fillRect(dx,dy,100,100);
         ctx.save();
     }
