@@ -1,4 +1,4 @@
-import React,{useRef,useEffect, useState, KeyboardEvent} from "react";
+import React,{useRef,useEffect, useState} from "react";
 
 const Canvas = ()=>{
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -22,7 +22,7 @@ const Canvas = ()=>{
     const keyHandler = (e: any) =>{
         switch(e.code){
             case "ArrowUp":
-                setDy(num=>num+10);
+                setDy(num=>num-10);
                 break;
             case "ArrowRight":
                 setDx(num=>num+10);
@@ -31,21 +31,18 @@ const Canvas = ()=>{
                 setDx(num=>num-10);
                 break;
             case "ArrowDown":
-                setDy(num=>num-10);
+                setDy(num=>num+10);
                 break;
         }
         drawBackground(getContext());
     }
 
     useEffect(()=>{
-        const ctx: CanvasRenderingContext2D = getContext();
-        
         document.addEventListener("keydown",keyHandler,false);
-        drawBackground(ctx);
         return ()=>{
             document.removeEventListener("keydown",keyHandler);
         }
-    },[])
+    },[dx,dy])
 
     return (
         <canvas width="1000" height="700" ref={canvasRef}/>
