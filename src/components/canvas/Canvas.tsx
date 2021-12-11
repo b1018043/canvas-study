@@ -1,10 +1,17 @@
-import React,{useRef,useEffect, useState} from "react";
+import React,{useRef,useEffect, useState,MouseEvent} from "react";
+
+interface block{
+    x: number;
+    y: number;
+}
 
 const Canvas = ()=>{
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const [dx,setDx] = useState<number>(0);
     const [dy,setDy] = useState<number>(0);
+
+    const [blocks,setBlocks] = useState<Array<block>>([] as block[]);
 
     const getContext = (): CanvasRenderingContext2D =>{
         const canvas: HTMLCanvasElement|any = canvasRef.current;
@@ -19,7 +26,7 @@ const Canvas = ()=>{
         ctx.save();
     }
 
-    const keyHandler = (e: any) =>{
+    const keyHandler = (e: KeyboardEvent):void =>{
         switch(e.code){
             case "ArrowUp":
                 setDy(num=>num-10);
@@ -44,8 +51,12 @@ const Canvas = ()=>{
         }
     },[dx,dy])
 
+    const canvasClickHandler = (e: MouseEvent) =>{
+        console.log(`x: ${e.pageX}, y: ${e.pageY}`)
+    }
+
     return (
-        <canvas width="1000" height="700" ref={canvasRef}/>
+        <canvas width="1000" height="700" ref={canvasRef} onClick={canvasClickHandler}/>
     )
 }
 
