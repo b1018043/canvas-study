@@ -1,6 +1,7 @@
 import React,{useRef,useEffect, useState,MouseEvent} from "react";
 
 interface block{
+    id: string;
     x: number;
     y: number;
 }
@@ -45,6 +46,16 @@ const Canvas = ()=>{
         drawBackground(getContext());
     }
 
+    const socketRef = useRef<WebSocket>();
+
+    useEffect(()=>{
+        socketRef.current = new WebSocket("ws://localhost:8080/ws");
+        socketRef.current.onopen=((ev:Event)=>{})
+        return ()=>{
+            socketRef.current?.close();
+        }
+    },[])
+
     useEffect(()=>{
         document.addEventListener("keydown",keyHandler,false);
         drawBackground(getContext());
@@ -65,16 +76,8 @@ const Canvas = ()=>{
         })
     }
 
-
-    const canvasClickHandler = (e: MouseEvent) =>{
-        console.log(`x: ${e.pageX}, y: ${e.pageY}`)
-        
-        const newBlock: block = {x:e.pageX,y:e.pageY};
-        setBlocks(bls=>[...bls,newBlock]);
-    }
-
     return (
-        <canvas width="1000px" height="1000px" ref={canvasRef} onClick={canvasClickHandler}/>
+        <canvas width="1000px" height="1000px" ref={canvasRef}/>
     )
 }
 
