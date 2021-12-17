@@ -1,9 +1,17 @@
+import { randomInt } from "crypto";
 import React,{useRef,useEffect, useState,MouseEvent} from "react";
 
 interface block{
-    id: string;
+    id: number;
     x: number;
     y: number;
+}
+
+interface Response {
+    type: string;
+    id: number;
+    x?: number;
+    y?: number;
 }
 
 const Canvas = ()=>{
@@ -50,7 +58,25 @@ const Canvas = ()=>{
 
     useEffect(()=>{
         socketRef.current = new WebSocket("ws://localhost:8080/ws");
-        socketRef.current.onopen=((ev:Event)=>{})
+        socketRef.current.onmessage = (e: MessageEvent<string>)=>{
+            const res:Response = JSON.parse(e.data) as Response;
+            console.log(`called type ${res.type}`)
+            switch(res.type){
+                case "join":
+                    const newX:number = Math.random()*100;
+                    const newY:number = Math.random()*100;
+                    const nb:block = {
+                        id: res.id,
+                        x: newX,
+                        y: newY,
+                    }
+                    setBlocks(bls=>[...bls,nb]);
+                    break;
+                case "leave":
+                    setBlocks(bls=>bls.filter(item=>item.id!==res.id));
+                    break;
+            }
+        }
         return ()=>{
             socketRef.current?.close();
         }
@@ -70,7 +96,8 @@ const Canvas = ()=>{
 
     const drawBlocks = () =>{
         const ctx: CanvasRenderingContext2D = getContext();
-        ctx.fillStyle = "#123456";
+        const randomColor: string = "rgb(" + (~~(256 * Math.random())) + ", " + (~~(256 * Math.random())) + ", " + (~~(256 * Math.random())) + ")" ;
+        ctx.fillStyle = randomColor;
         blocks.forEach(item=>{
             ctx.fillRect(item.x,item.y,20,20);
         })
