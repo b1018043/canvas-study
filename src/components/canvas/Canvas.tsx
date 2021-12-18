@@ -14,6 +14,11 @@ interface Response {
     y?: number;
 }
 
+interface Request {
+    x: number;
+    y: number;
+}
+
 const Canvas = ()=>{
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -60,11 +65,10 @@ const Canvas = ()=>{
         socketRef.current = new WebSocket("ws://localhost:8080/ws");
         socketRef.current.onmessage = (e: MessageEvent<string>)=>{
             const res:Response = JSON.parse(e.data) as Response;
-            console.log(`called type ${res.type}`)
             switch(res.type){
                 case "join":
-                    const newX:number = Math.random()*100;
-                    const newY:number = Math.random()*100;
+                    const newX:number = 0;
+                    const newY:number = 0;
                     const nb:block = {
                         id: res.id,
                         x: newX,
@@ -75,12 +79,36 @@ const Canvas = ()=>{
                 case "leave":
                     setBlocks(bls=>bls.filter(item=>item.id!==res.id));
                     break;
+                case "move":
+                    setBlocks(bls=>{
+                        return bls.map(item=>{
+                            if(item.id===res.id){
+                                const newItem: block = {
+                                    id: item.id,
+                                    x:res.x||0,
+                                    y: res.y||0,
+                                }
+                                return newItem
+                            }
+                            return item;
+                        }) as block[];
+                    });
             }
         }
         return ()=>{
             socketRef.current?.close();
         }
     },[])
+
+    useEffect(()=>{
+        if(socketRef.current?.readyState===1){
+            const req:Request = {
+                x: dx,
+                y: dy,
+            }
+            socketRef.current.send(JSON.stringify(req));
+        }
+    },[dx,dy,socketRef.current?.readyState])
 
     useEffect(()=>{
         document.addEventListener("keydown",keyHandler,false);
