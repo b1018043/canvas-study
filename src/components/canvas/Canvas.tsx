@@ -1,5 +1,5 @@
-import { randomInt } from "crypto";
 import React,{useRef,useEffect, useState,MouseEvent} from "react";
+import randomColor from "../../utils/color";
 
 interface block{
     id: number;
@@ -19,7 +19,11 @@ interface Request {
     y: number;
 }
 
-const Canvas = ()=>{
+interface CanvasProps{
+    parentRef: React.RefObject<HTMLDivElement>;
+}
+
+const Canvas = ({parentRef}:CanvasProps)=>{
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const [dx,setDx] = useState<number>(0);
@@ -33,6 +37,9 @@ const Canvas = ()=>{
     };
 
     const drawBackground = (ctx: CanvasRenderingContext2D) =>{
+        if(!canvasRef.current) return;
+        canvasRef.current.height = parentRef.current?.clientHeight || 100;
+        canvasRef.current.width = parentRef.current?.clientWidth || 100;
         ctx.fillStyle = "black"
         ctx.fillRect(0,0,1000,700);
         ctx.fillStyle = "red";
@@ -124,15 +131,14 @@ const Canvas = ()=>{
 
     const drawBlocks = () =>{
         const ctx: CanvasRenderingContext2D = getContext();
-        const randomColor: string = "rgb(" + (~~(256 * Math.random())) + ", " + (~~(256 * Math.random())) + ", " + (~~(256 * Math.random())) + ")" ;
-        ctx.fillStyle = randomColor;
         blocks.forEach(item=>{
+            ctx.fillStyle = randomColor();
             ctx.fillRect(item.x,item.y,20,20);
         })
     }
 
     return (
-        <canvas width="1000px" height="1000px" ref={canvasRef}/>
+        <canvas width="100%" height="100%" ref={canvasRef}/>
     )
 }
 
