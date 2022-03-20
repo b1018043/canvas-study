@@ -1,5 +1,6 @@
-import React,{useRef,useEffect, useState,MouseEvent} from "react";
+import React,{useRef,useEffect, useState} from "react";
 import randomColor from "../../utils/color";
+import useWebSocket from "./useWebSocket";
 
 interface block{
     id: number;
@@ -20,7 +21,40 @@ interface Request {
 }
 
 const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
-    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    const {websocketReadyState,websocketSend} = useWebSocket("ws://localhost:8080/ws",(e: MessageEvent<string>)=>{
+        const res:Response = JSON.parse(e.data) as Response;
+        switch(res.type){
+            case "join":
+                const newX:number = 0;
+                const newY:number = 0;
+                const nb:block = {
+                    id: res.id,
+                    x: newX,
+                    y: newY,
+                }
+                setBlocks(bls=>[...bls,nb]);
+                break;
+            case "leave":
+                setBlocks(bls=>bls.filter(item=>item.id!==res.id));
+                break;
+            case "move":
+                setBlocks(bls=>{
+                    return bls.map(item=>{
+                        if(item.id===res.id){
+                            const newItem: block = {
+                                id: item.id,
+                                x:res.x||0,
+                                y: res.y||0,
+                            }
+                            return newItem
+                        }
+                        return item;
+                    }) as block[];
+                });
+        }
+    });
 
     const [dx,setDx] = useState<number>(0);
     const [dy,setDy] = useState<number>(0);
@@ -62,56 +96,15 @@ const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
         drawBackground(getContext());
     }
 
-    const socketRef = useRef<WebSocket>();
-
     useEffect(()=>{
-        socketRef.current = new WebSocket("ws://localhost:8080/ws");
-        socketRef.current.onmessage = (e: MessageEvent<string>)=>{
-            const res:Response = JSON.parse(e.data) as Response;
-            switch(res.type){
-                case "join":
-                    const newX:number = 0;
-                    const newY:number = 0;
-                    const nb:block = {
-                        id: res.id,
-                        x: newX,
-                        y: newY,
-                    }
-                    setBlocks(bls=>[...bls,nb]);
-                    break;
-                case "leave":
-                    setBlocks(bls=>bls.filter(item=>item.id!==res.id));
-                    break;
-                case "move":
-                    setBlocks(bls=>{
-                        return bls.map(item=>{
-                            if(item.id===res.id){
-                                const newItem: block = {
-                                    id: item.id,
-                                    x:res.x||0,
-                                    y: res.y||0,
-                                }
-                                return newItem
-                            }
-                            return item;
-                        }) as block[];
-                    });
-            }
-        }
-        return ()=>{
-            socketRef.current?.close();
-        }
-    },[])
-
-    useEffect(()=>{
-        if(socketRef.current?.readyState===1){
+        if(websocketReadyState===1&&websocketSend){
             const req:Request = {
                 x: dx,
                 y: dy,
             }
-            socketRef.current.send(JSON.stringify(req));
+            websocketSend(JSON.stringify(req));
         }
-    },[dx,dy,socketRef.current?.readyState])
+    },[dx,dy,websocketReadyState])
 
     useEffect(()=>{
         document.addEventListener("keydown",keyHandler,false);
