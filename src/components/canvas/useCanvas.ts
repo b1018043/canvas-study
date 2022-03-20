@@ -20,6 +20,9 @@ interface Request {
     y: number;
 }
 
+const BACKGROUND_COLOR = "black";
+const USERRECT_COLOR = "red";
+
 const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -70,9 +73,9 @@ const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
         if(!canvasRef.current) return;
         canvasRef.current.height = parentRef.current?.clientHeight || 100;
         canvasRef.current.width = parentRef.current?.clientWidth || 100;
-        ctx.fillStyle = "black"
-        ctx.fillRect(0,0,1000,700);
-        ctx.fillStyle = "red";
+        ctx.fillStyle = BACKGROUND_COLOR;
+        ctx.fillRect(0,0,canvasRef.current.width,canvasRef.current.height);
+        ctx.fillStyle = USERRECT_COLOR;
         ctx.fillRect(dx,dy,100,100);
         drawBlocks();
         ctx.save();
