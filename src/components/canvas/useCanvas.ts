@@ -6,6 +6,7 @@ interface block{
     id: number;
     x: number;
     y: number;
+    style: string;
 }
 
 interface Response {
@@ -36,6 +37,7 @@ const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
                     id: res.id,
                     x: newX,
                     y: newY,
+                    style: randomColor(),
                 }
                 setBlocks(bls=>[...bls,nb]);
                 break;
@@ -50,6 +52,7 @@ const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
                                 id: item.id,
                                 x:res.x||0,
                                 y: res.y||0,
+                                style: item.style,
                             }
                             return newItem
                         }
@@ -124,7 +127,7 @@ const useCanvas = (parentRef: React.RefObject<HTMLDivElement>) =>{
     const drawBlocks = () =>{
         const ctx: CanvasRenderingContext2D = getContext();
         blocks.forEach(item=>{
-            ctx.fillStyle = randomColor();
+            ctx.fillStyle = item.style;
             ctx.fillRect(item.x,item.y,20,20);
         })
     }
