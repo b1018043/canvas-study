@@ -1,4 +1,4 @@
-import React,{useRef,useEffect, useState,MouseEvent} from "react";
+import React from "react";
 import useCanvas from "./useCanvas";
 
 interface CanvasProps{
